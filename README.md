@@ -1,2 +1,2 @@
-# GMOD-Space-Explorers
-Un gamemode XD
+# Garry's Mod Space Explorers
+WIP Gamemode.
