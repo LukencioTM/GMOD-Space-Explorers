@@ -1,178 +1,240 @@
-surface.CreateFont("se_shop_title", {
-  font = "Trebuchet MS",
-  size = 38,
-  weight = 800,
-  antialias = true,
-})
-surface.CreateFont("se_shop_credits", {
-  font = "Trebuchet MS",
-  size = 24,
-  weight = 600,
-  antialias = true,
-})
-surface.CreateFont("se_shop_item_name", {
-  font = "Trebuchet MS",
-  size = 22,
-  weight = 700,
-  antialias = true,
-})
-surface.CreateFont("se_shop_item_price", {
-  font = "Trebuchet MS",
-  size = 18,
-  weight = 500,
-  antialias = true,
-})
+se_npcs_positions = {
+  {
+    Position = Vector(734,-4922,-975),
+    Angles = Angle(0,117,0),
+  },
+  {
+    Position = Vector(880,-4914,-975),
+    Angles = Angle(0,67,0),
+  },
+  {
+    Position = Vector(1017,-5056,-975),
+    Angles = Angle(0,21,0),
+  },
+  {
+    Position = Vector(893,-5321,-975),
+    Angles = Angle(0,-70,0),
+  },
+  {
+    Position = Vector(1044,-6457,-783),
+    Angles = Angle(0,105,0),
+  },
+  {
+    Position = Vector(1515,-6436,-783),
+    Angles = Angle(0,148,0),
+  },
+  {
+    Position = Vector(1761,-5749,-783),
+    Angles = Angle(0,86,0),
+  },
+  {
+    Position = Vector(-397,-5089,-783),
+    Angles = Angle(0,81,0),
+  },
+  {
+    Position = Vector(757,-5327,-975),
+    Angles = Angle(0,-122,0),
+  },
+  {
+    Position = Vector(635,-5227,-975),
+    Angles = Angle(0,-161,0),
+  },
+}
 
-local blur = Material("pp/blurscreen")
-local function DrawBlur(panel, amount)
-  local x, y = panel:LocalToScreen(0, 0)
-  surface.SetDrawColor(255, 255, 255)
-  surface.SetMaterial(blur)
-  for i = 1, 3 do
-    blur:SetFloat("$blur", (i / 3) * (amount or 6))
-    blur:Recompute()
-    render.UpdateScreenEffectTexture()
-    surface.DrawTexturedRect(x * -1, y * -1, ScrW(), ScrH())
+se_npc_gun_shop = {
+  {
+    Name = "SMG",
+    Weapon = "weapon_smg1",
+    Ammo = "SMG1",
+    PriceMin = 20,
+    PriceMax = 50,
+    IsAmmo = false
+  },
+  {
+    Name = "Municion SMG",
+    Weapon = "SMG1",
+    PriceMin = 1,
+    PriceMax = 10,
+    IsAmmo = true
+  },
+  {
+    Name = "Escopeta",
+    Weapon = "weapon_shotgun",
+    Ammo = "SMG1",
+    PriceMin = 20,
+    PriceMax = 70,
+    IsAmmo = false
+  },
+  {
+    Name = "Municion de escopeta",
+    Weapon = "Buckshot",
+    PriceMin = 1,
+    PriceMax = 10,
+    IsAmmo = true
+  },
+  {
+    Name = "Ballesta",
+    Weapon = "weapon_crossbow",
+    Ammo = "SMG1",
+    PriceMin = 20,
+    PriceMax = 70,
+    IsAmmo = false
+  },
+  {
+    Name = "Municion de ballesta",
+    Weapon = "XBowBolt",
+    PriceMin = 1,
+    PriceMax = 10,
+    IsAmmo = true
+  },
+}
+
+se_npc_weapon_shop = {
+  {
+    Name = "Misil triple",
+    PriceMin = 100,
+    PriceMax = 200,
+    Id = "TripleMissle"
+  },
+  {
+    Name = "Mega blaster",
+    PriceMin = 50,
+    PriceMax = 150,
+    Id = "MegaBlaster"
+  },
+  {
+    Name = "Canon del diablo",
+    PriceMin = 50,
+    PriceMax = 150,
+    Id = "DevilGun"
+  },
+  {
+    Name = "Mega canon del diablo",
+    PriceMin = 150,
+    PriceMax = 250,
+    Id = "MegaDevilGun"
+  },
+}
+function se_init_npcs()
+  local prev_poses = {}
+  for k=1,math.random(4, 7) do
+    local pos_rot = table.Random(se_npcs_positions)
+    local pos = pos_rot.Position
+    local rot = pos_rot.Angles
+    if !table.HasValue(prev_poses, pos) then
+      table.insert(prev_poses, pos)
+      local npc = ents.Create("se_shop_npc")
+      npc:SetPos(pos)
+      npc:SetAngles(rot)
+      npc:Spawn()
+    end
   end
 end
 
-net.Receive("se_open_npc_shop", function()
-  local ent = net.ReadEntity()
-  local shop = net.ReadTable()
-  local credits = net.ReadInt(32)
 
-  local se_shop_main = vgui.Create( "DFrame" )
-  se_shop_main:SetSize(700, 600)
-  se_shop_main:Center()
-  se_shop_main:SetDraggable( true )
-  se_shop_main:MakePopup()
-  se_shop_main:SetTitle( "" )
-  se_shop_main:ShowCloseButton( false )
-  
-  se_shop_main.Paint = function(self, w, h)
-    DrawBlur(self, 5)
-    draw.RoundedBox( 8, 0, 0, w, h, Color(15, 20, 30, 230) )
-    draw.RoundedBoxEx( 8, 0, 0, w, 80, Color(25, 35, 55, 250), true, true, false, false )
-    
-    -- Decorative tech lines
-    surface.SetDrawColor(80, 180, 255, 100)
-    surface.DrawRect(0, 78, w, 2)
-    surface.SetDrawColor(80, 180, 255, 30)
-    surface.DrawRect(20, h - 20, w - 40, 1)
-
-    draw.SimpleText( "MERCADO ESTELAR", "se_shop_title", 30, 40, Color(230, 245, 255), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER )
-    
-    -- Credits box
-    draw.RoundedBox( 6, w - 220, 20, 180, 40, Color(10, 15, 20, 200) )
-    draw.SimpleText( string.Comma(credits) .. " CR", "se_shop_credits", w - 130, 40, Color(100, 220, 150), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
-  end
-
-  local close_btn = vgui.Create( "DButton", se_shop_main )
-  close_btn:SetSize( 40, 40 )
-  close_btn:SetPos( se_shop_main:GetWide() - 40, 0 )
-  close_btn:SetText( "" )
-  close_btn.Paint = function(self, w, h)
-    if self:IsHovered() then
-      draw.RoundedBoxEx( 8, 0, 0, w, h, Color(220, 50, 50, 200), false, true, false, false )
-    end
-    draw.SimpleText( "X", "se_shop_credits", w/2, h/2, Color(255, 255, 255, 200), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
-  end
-  close_btn.DoClick = function()
-    se_shop_main:Close()
-  end
-
-  local scroll = vgui.Create( "DScrollPanel", se_shop_main )
-  scroll:Dock( FILL )
-  scroll:DockMargin( 20, 90, 20, 30 )
-  
-  local sbar = scroll:GetVBar()
-  function sbar:Paint(w, h)
-    draw.RoundedBox(4, 0, 0, w, h, Color(10, 15, 25, 150))
-  end
-  function sbar.btnUp:Paint(w, h) end
-  function sbar.btnDown:Paint(w, h) end
-  function sbar.btnGrip:Paint(w, h)
-    draw.RoundedBox(4, 2, 0, w-4, h, Color(80, 140, 200, 150))
-  end
-
-  for k, item in pairs(shop) do
-    local item_pnl = scroll:Add( "DPanel" )
-    item_pnl:Dock( TOP )
-    item_pnl:SetTall( 70 )
-    item_pnl:DockMargin( 0, 0, 10, 10 )
-    
-    local can_afford = credits >= item.Price
-    local hover_frac = 0
-
-    item_pnl.Paint = function(self, w, h)
-      local is_hovered = self:IsHovered() or self:IsChildHovered()
-      hover_frac = math.Approach(hover_frac, is_hovered and 1 or 0, FrameTime() * 8)
-      
-      local bg_color = can_afford and Color(30, 45, 65, 200) or Color(40, 25, 25, 200)
-      local hover_color = can_afford and Color(50, 80, 120, 250) or Color(70, 30, 30, 250)
-      
-      local col = Color(
-        Lerp(hover_frac, bg_color.r, hover_color.r),
-        Lerp(hover_frac, bg_color.g, hover_color.g),
-        Lerp(hover_frac, bg_color.b, hover_color.b),
-        Lerp(hover_frac, bg_color.a, hover_color.a)
-      )
-      
-      draw.RoundedBox( 6, 0, 0, w, h, col )
-      
-      -- Left accent line
-      draw.RoundedBoxEx( 6, 0, 0, 6, h, can_afford and Color(80, 180, 255) or Color(255, 80, 80), true, false, true, false )
-
-      draw.SimpleText( item.Name, "se_shop_item_name", 25, h/2 - 12, Color(240, 245, 255), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER )
-      draw.SimpleText( "Adquisición de tecnología", "se_shop_item_price", 25, h/2 + 12, Color(150, 170, 190), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER )
-    end
-
-    local buy_btn = vgui.Create( "DButton", item_pnl )
-    buy_btn:Dock( RIGHT )
-    buy_btn:SetWide( 140 )
-    buy_btn:DockMargin( 10, 15, 15, 15 )
-    buy_btn:SetText( "" )
-    
-    buy_btn.Paint = function(self, w, h)
-      if can_afford then
-        if self:IsHovered() then
-          draw.RoundedBox( 4, 0, 0, w, h, Color(80, 200, 120, 255) )
-          draw.SimpleText( string.Comma(item.Price) .. " CR", "se_shop_item_name", w/2, h/2, Color(20, 50, 30), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
+function se_npc_gen_gun_shop (ent)
+  local guns = {}
+  for k=1, 3 do
+    local gun = table.Random(se_npc_gun_shop)
+    if !table.HasValue(guns, gun) then
+      ent:AddItem(gun.Name, math.random(gun.PriceMin * se_fractions.Price_Mod, gun.PriceMax * se_fractions.Price_Mod), function(ply)
+        if !gun.IsAmmo then
+          local weapon = ply:Give(gun.Weapon)
+          ply:GiveAmmo( 100, gun.Ammo )
         else
-          draw.RoundedBox( 4, 0, 0, w, h, Color(20, 30, 40, 250) )
-          surface.SetDrawColor(80, 200, 120, 150)
-          surface.DrawOutlinedRect(0, 0, w, h, 1)
-          draw.SimpleText( string.Comma(item.Price) .. " CR", "se_shop_item_name", w/2, h/2, Color(80, 200, 120), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
+          ply:GiveAmmo( 10, gun.Weapon )
         end
-      else
-        draw.RoundedBox( 4, 0, 0, w, h, Color(30, 20, 20, 200) )
-        draw.SimpleText( string.Comma(item.Price) .. " CR", "se_shop_item_name", w/2, h/2, Color(150, 80, 80), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER )
-      end
+      end)
+      table.insert(guns, gun)
     end
-    
-    buy_btn.DoClick = function()
-      if can_afford then
-        net.Start("se_buy_item")
-        net.WriteEntity(ent)
-        net.WriteInt(k, 8)
-        net.SendToServer()
-        
-        surface.PlaySound("UI/buttonclick.wav")
-        
-        if item.Close then
-          se_shop_main:Close()
-        end
-        if LocalPlayer():GetNWBool("se_shopping_enabled", false) then
-          credits = credits - item.Price
-        end
-        
-        -- Force re-evaluation of affordability for all items
-        for _, pnl in ipairs(scroll:GetCanvas():GetChildren()) do
-           pnl:InvalidateLayout()
-        end
-      else
-        surface.PlaySound("buttons/button10.wav")
-      end
+  end
+end
+
+function se_npc_gen_weapons_shop (ent)
+  local weapons = {}
+  for k=1, 3 do
+    local weapon = table.Random(se_npc_weapon_shop)
+    if !table.HasValue(weapons, weapon) then
+      ent:AddItem(weapon.Name, math.random(weapon.PriceMin * se_fractions.Price_Mod, weapon.PriceMax * se_fractions.Price_Mod), function(ply)
+        local new_weapon = se_weapons[weapon.Id]
+        table.insert(players_spaceship.modules.Weapons.weapons, table.Copy(new_weapon))
+      end)
+      table.insert(weapons, weapon)
+    end
+  end
+end
+
+function se_npc_ship_service (ent)
+  local weapons = {}
+  ent:AddItem("Comprar combustible", 2, function(ply)
+    players_spaceship.fuel = players_spaceship.fuel + 2
+  end)
+  ent:AddItem("Reparar nave", 2, function(ply)
+    players_spaceship.health = players_spaceship.health + 2
+    if players_spaceship.health > players_spaceship.max_health then
+      players_spaceship.health = players_spaceship.max_health
+    end
+  end)
+end
+
+function se_npc_ship_upgrades (ent)
+  local weapons = {}
+  ent:AddItem("+5 salud", 25, function(ply)
+    players_spaceship.health = players_spaceship.health + 5
+    players_spaceship.max_health = players_spaceship.max_health + 5
+  end)
+  ent:AddItem("+5 escudos", 25, function(ply)
+    players_spaceship.shields = players_spaceship.shields + 5
+    players_spaceship.max_shields = players_spaceship.max_shields + 5
+  end)
+  ent:AddItem("Velocidad de regeneracion de escudos", 50, function(ply)
+    players_spaceship.shield_reg_mod = players_spaceship.shield_reg_mod + 1
+  end)
+end
+
+function se_npc_mining_equipment (ent)
+  ent:AddItem("Modulo de mineria", 50, function(ply)
+    if !players_spaceship.modules.AsteroidMining then
+      se_spawn_maining()
+    else
+      return false
+    end
+  end, {}, true)
+  ent:AddItem("Mejora de modulo de mineria", 50, function(ply)
+    if players_spaceship.modules.AsteroidMining and players_spaceship.modules.AsteroidMining.miner_level < 5 then
+      players_spaceship.modules.AsteroidMining.miner_level = players_spaceship.modules.AsteroidMining.miner_level + 1
+    else
+      return false
+    end
+  end, {}, true)
+  ent:AddItem("Vender mineral", 0, function(ply)
+    local summ = 0
+    summ = summ + players_spaceship.resources.gold * 0.4
+    summ = summ + (players_spaceship.resources.silver * 0.3)
+    summ = summ + (players_spaceship.resources.iron * 0.2)
+    summ = math.Round(summ)
+
+    players_spaceship.credits = players_spaceship.credits + summ
+    ply:ChatPrint("Vendiste tu mineral por "..summ.." creditos")
+    players_spaceship.resources.gold = 0
+    players_spaceship.resources.silver = 0
+    players_spaceship.resources.iron = 0
+    return false
+  end, {}, true)
+end
+
+net.Receive("se_buy_item", function(_, ply)
+  local ent = net.ReadEntity()
+  local item = net.ReadInt(8)
+  local item = ent.items[item]
+  if players_spaceship.credits >= item.Price and ply.shopping_enabled then
+    local spend_money = item.Fn(ply)
+    if spend_money != false then
+      players_spaceship.credits = players_spaceship.credits - item.Price
+    end
+  else
+    if !ply.shopping_enabled then
+      ply:ChatPrint("El capitan desactivo tus compras")
     end
   end
 end)
