@@ -376,6 +376,7 @@ function se_init_comms()
     },
   }
 end
+
 function se_choose_comm(choose)
   if cooldown < SysTime() and !se_comm_done then
     cooldown = SysTime() + 0.5

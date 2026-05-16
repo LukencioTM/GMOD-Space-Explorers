@@ -4,6 +4,14 @@ se_language = se_language or {}
 -- Creamos la sub-tabla para este idioma específico
 se_language.eng = {} -- En el archivo inglés pon se_language.en = {}, etc.
 
+se_language.eng["WeaponsTerminal"] = "Weapons"
+se_language.eng["PilotTerminal"] = "Pilot"
+se_language.eng["HyperDriveTerminal"] = "Hyper Drive"
+se_language.eng["TeleportTerminal"] = "Teleport"
+se_language.eng["LifeSupportTerminal"] = "Life Support"
+se_language.eng["ShieldsTerminal"] = "Shields"
+se_language.eng["CommunicationTerminal"] = "Communication"
+
 se_language.eng["BuyFuelMain"] = "Welcome wanderers! Take a look on what we've got..."
 se_language.eng["BuyFuel"] = "Buy fuel"
 se_language.eng["RepairShip"] = "Repair ship"

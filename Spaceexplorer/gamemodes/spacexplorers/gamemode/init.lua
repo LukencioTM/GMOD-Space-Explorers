@@ -262,6 +262,7 @@ function se_change_lang(lang)
   print("El idioma fue cambiado a " .. lang)
   se_settings.language = lang
   se_init_comms()
+  se_update_module_lang()
 end
 
 net.Receive("se_change_lang", function(_, ply)
@@ -380,3 +381,15 @@ function GM:CanTool(ply, tr, toolname)
     if not GetGlobalBool("se_sandbox_enabled", false) then return false end
     return self.BaseClass.CanTool(self, ply, tr, toolname)
 end
+
+function prueba()
+	for k,v in pairs(se_language) do
+		print(k)
+		--if self:GetNWString("se_terminal_name", "Terminal") == se_language[k]["WeaponsTerminal"]  then
+		--	self:DrawPilotPanel()
+		--	self:DrawPilotMapPanel()
+		--end
+	end
+end
+
+concommand.Add("se_prueba", prueba)

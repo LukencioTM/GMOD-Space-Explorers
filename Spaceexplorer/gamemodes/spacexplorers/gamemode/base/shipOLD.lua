@@ -72,7 +72,7 @@ function se_init_ship()
         angle = Angle(0, -90, 0)
       },
       Communication = {
-        name = "Comunicaciones",
+        name = "Comunicacion",
         health = 100,
         pos = Vector(-63, -1000, 32),
         angle = Angle(0, 90, 0),
@@ -863,8 +863,8 @@ function se_try_jump()
     end
 
     if !star.explored and se_fractions.MoneyForExploring then
-      players_spaceship.credits = players_spaceship.credits + 2
-      players_spaceship.modules.Communication.ent:PrintLn("+2 creditos por explorar el sistema")
+      players_spaceship.credits = players_spaceship.credits + 3
+      players_spaceship.modules.Communication.ent:PrintLn("+3 creditos por explorar el sistema")
     end
 
     se_global_jumps = se_global_jumps + 1
@@ -881,23 +881,17 @@ function se_try_jump()
 end
 
 function se_update_module_lang()
-	--METODO VIEJO: players_spaceship.modules.Weapons.name = se_language[se_settings.language]["WeaponsTerminal"] ...
+	players_spaceship.modules.Weapons.name = se_language[se_settings.language]["WeaponsTerminal"]
+	players_spaceship.modules.Pilot.name = se_language[se_settings.language]["PilotTerminal"]
+	players_spaceship.modules.HyperDrive.name = se_language[se_settings.language]["HyperDriveTerminal"]
+	players_spaceship.modules.Teleport.name = se_language[se_settings.language]["TeleportTerminal"]
+	players_spaceship.modules.LifeSupport.name = se_language[se_settings.language]["LifeSupportTerminal"]
+	players_spaceship.modules.Shields.name = se_language[se_settings.language]["ShieldsTerminal"]
+	players_spaceship.modules.Communication.name = se_language[se_settings.language]["CommunicationTerminal"]
 	
-	--Cambiamos el nombre de las terminales segun el lenguaje elegido
-	--Creamos un diccionario clave = llave con el nombre de las terminales y el tipo de traduccion
-	local modulesList = {Weapons = "WeaponsTerminal", Pilot = "PilotTerminal", HyperDrive = "HyperDriveTerminal", Teleport = "TeleportTerminal", LifeSupport = "LifeSupportTerminal", Shields = "ShieldsTerminal", Communication = "CommunicationTerminal"}
-	--Creamos un ciclo para que el nombre de cada tipo de terminal se reemplace por el valor de la traduccion elegida
-	for k, v in pairs(modulesList) do
-		print(k,v)
-		players_spaceship.modules[k].name = se_language[se_settings.language][v]
-	end
-	
-	for k, v in pairs(players_spaceship.modules) do
-		v.ent:SetNWString("se_terminal_name", v.name)
-	end
-	for k, v in pairs( ents.FindByClass( "se_terminal" ) ) do
-		print(v, v:GetNWString("se_terminal_name", v.name))
+	local modulesList = {Weapons = "WeaponsTerminal", Pilot = "PilotTerminal", HyperDrive = "HyperDriveTerminal", Teleport = "TeleportTerminal", LifeSupport = ["LifeSupportTerminal", Shields = "ShieldsTerminal", Communication = "CommunicationTerminal"}
+	for k,v in pairs(modulesList) do
+	print(k,v)
+		--players_spaceship.modules.Weapons.name = se_language[se_settings.language]["WeaponsTerminal"]
 	end
 end
-
- 
